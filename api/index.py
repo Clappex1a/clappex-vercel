@@ -32,7 +32,7 @@ async def chat(request: Request):
         }
 
         payload = {
-            "model": "mistral:7b-instruct",
+            "openchat/openchat-3.5-1210",
             "messages": [
                 {"role": "system", "content": "You are Clappex, a friendly AI assistant."},
                 {"role": "user", "content": user_message}
