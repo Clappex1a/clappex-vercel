@@ -32,7 +32,7 @@ async def chat(request: Request):
         }
 
         payload = {
-            "openchat/openchat-3.5-1210",
+            "model": "openchat/openchat-3.5-1210",
             "messages": [
                 {"role": "system", "content": "You are Clappex, a friendly AI assistant."},
                 {"role": "user", "content": user_message}
@@ -41,7 +41,7 @@ async def chat(request: Request):
 
         async with httpx.AsyncClient() as client:
             response = await client.post(os.getenv("MODEL_API_URL"), headers=headers, json=payload)
-            print("🔍 OpenRouter raw response:", response.text)  # Debug print
+            print("🔍 OpenRouter raw response:", response.text)
             data = response.json()
 
             if "choices" in data:
