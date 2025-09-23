@@ -41,9 +41,14 @@ async def chat(request: Request):
 
         async with httpx.AsyncClient() as client:
             response = await client.post(os.getenv("MODEL_API_URL"), headers=headers, json=payload)
-            reply = response.json()["choices"][0]["message"]["content"]
+            print("🔍 OpenRouter raw response:", response.text)  # Debug print
+            data = response.json()
 
-        return JSONResponse(content={"reply": reply})
+            if "choices" in data:
+                reply = data["choices"][0]["message"]["content"]
+                return JSONResponse(content={"reply": reply})
+            else:
+                return JSONResponse(content={"error": "OpenRouter response missing 'choices'", "raw": data}, status_code=500)
 
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
