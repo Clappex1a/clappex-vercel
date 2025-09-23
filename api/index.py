@@ -54,6 +54,40 @@ async def chat(request: Request):
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
+# Booking endpoint with Cal.com
+@app.post("/book")
+async def book(request: Request):
+    try:
+        data = await request.json()
+        name = data.get("name")
+        email = data.get("email")
+        time = data.get("time")  # ISO format like "2025-09-23T10:00:00Z"
+
+        headers = {
+            "Authorization": f"Bearer {os.getenv('CAL_API_KEY')}",
+            "Content-Type": "application/json"
+        }
+
+        payload = {
+            "eventTypeId": os.getenv("CAL_EVENT_TYPE_ID"),
+            "name": name,
+            "email": email,
+            "start": time
+        }
+
+        async with httpx.AsyncClient() as client:
+            response = await client.post("https://api.cal.com/v1/bookings", headers=headers, json=payload)
+            print("📅 Cal.com response:", response.text)
+            data = response.json()
+
+            if response.status_code == 200:
+                return JSONResponse(content={"success": True, "booking": data})
+            else:
+                return JSONResponse(content={"success": False, "error": data}, status_code=400)
+
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+
 # Vercel-compatible handler
 def handler(event, context):
     from mangum import Mangum
