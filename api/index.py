@@ -23,14 +23,13 @@ async def chat(request: Request):
         data = await request.json()
         user_message = data.get("message", "")
 
-        # Prepare OpenRouter request
         headers = {
             "Authorization": f"Bearer {os.getenv('API_KEY')}",
             "Content-Type": "application/json"
         }
 
         payload = {
-            "model": "mistral:7b-instruct",  # You can change this later
+            "model": "mistral:7b-instruct",
             "messages": [
                 {"role": "system", "content": "You are Clappex, a friendly AI assistant."},
                 {"role": "user", "content": user_message}
@@ -46,7 +45,6 @@ async def chat(request: Request):
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
-# Vercel-compatible handler
 def handler(event, context):
     from mangum import Mangum
     asgi_handler = Mangum(app)
