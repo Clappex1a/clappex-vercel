@@ -63,11 +63,16 @@ async def book(request: Request):
         email = data.get("email")
         time = data.get("time")  # ISO format like "2025-09-23T10:00:00Z"
 
+        api_key = os.getenv("CAL_API_KEY")
+        print("🔑 Loaded CAL_API_KEY:", api_key)  # Debug print to confirm key is loaded
+
+        if not api_key:
+            return JSONResponse(content={"error": "CAL_API_KEY not found in environment"}, status_code=500)
+
         headers = {
-            "Authorization": f"Bearer {os.getenv('CAL_API_KEY')}",  # ✅ Correct format for Cal.com
+            "Authorization": f"Bearer {api_key}",  # ✅ Correct format for Cal.com
             "Content-Type": "application/json"
         }
-        print("🔐 Sending headers:", headers)
 
         payload = {
             "eventTypeId": os.getenv("CAL_EVENT_TYPE_ID"),
