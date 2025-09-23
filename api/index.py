@@ -1,7 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Dict
 
 app = FastAPI()
 
@@ -18,8 +17,13 @@ def home():
     return JSONResponse(content={"message": "Clappex is live on Vercel!"})
 
 @app.post("/chat")
-def chat(payload: Dict):
-    return {"reply": "Hello from Clappex!"}
+async def chat(request: Request):
+    try:
+        data = await request.json()
+        message = data.get("message", "")
+        return JSONResponse(content={"reply": f"You said: {message}"})
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=400)
 
 # Vercel-compatible handler
 def handler(event, context):
