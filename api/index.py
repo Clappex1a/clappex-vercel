@@ -32,7 +32,7 @@ async def chat(request: Request):
         }
 
         payload = {
-            "model": "mistral:7b-instruct",  # You can change this model later
+            "model": "mistral:7b-instruct",
             "messages": [
                 {"role": "system", "content": "You are Clappex, a friendly AI assistant."},
                 {"role": "user", "content": user_message}
