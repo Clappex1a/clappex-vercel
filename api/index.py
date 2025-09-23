@@ -24,7 +24,7 @@ async def chat(request: Request):
         user_message = data.get("message", "")
 
         headers = {
-            "Authorization": f"Bearer {os.getenv('API_KEY')}",
+            "Authorization": f"apikey {api_key}",
             "Content-Type": "application/json"
         }
 
