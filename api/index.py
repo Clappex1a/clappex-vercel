@@ -63,13 +63,13 @@ async def book(request: Request):
         email = data.get("email")
         time = data.get("time")  # ISO format like "2025-09-23T10:00:00Z"
 
-        api_key = os.getenv("CAL_API_KEY")
-        print("🔑 Loaded CAL_API_KEY:", api_key)
+        raw_key = os.getenv("CAL_API_KEY")
+        print("🔑 Raw CAL_API_KEY:", repr(raw_key))
 
-        if not api_key:
+        if not raw_key:
             return JSONResponse(content={"error": "CAL_API_KEY not found in environment"}, status_code=500)
 
-        api_key = api_key.strip()  # ✅ Remove newline or space
+        api_key = raw_key.strip()  # ✅ Remove newline or space
 
         headers = {
             "Authorization": f"Bearer {api_key}",
@@ -85,8 +85,14 @@ async def book(request: Request):
 
         async with httpx.AsyncClient() as client:
             response = await client.post("https://api.cal.com/v1/bookings", headers=headers, json=payload)
-            print("📅 Cal.com response:", response.text)
-            data = response.json()
+            print("📅 Cal.com response status:", response.status_code)
+            print("📅 Cal.com response body:", response.text)
+
+            try:
+                data = response.json()
+            except Exception as parse_error:
+                print("❌ Failed to parse Cal.com JSON:", parse_error)
+                return JSONResponse(content={"error": "Cal.com returned invalid JSON", "raw": response.text}, status_code=500)
 
             if response.status_code == 200:
                 return JSONResponse(content={"success": True, "booking": data})
@@ -94,6 +100,7 @@ async def book(request: Request):
                 return JSONResponse(content={"success": False, "error": data}, status_code=400)
 
     except Exception as e:
+        print("🔥 Booking route crashed:", str(e))
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
 # Vercel-compatible handler
