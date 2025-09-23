@@ -33,6 +33,7 @@ async def chat(request: Request):
 
         payload = {
             "model": "openai/gpt-4o",
+            "max_tokens": 1000,
             "messages": [
                 {"role": "system", "content": "You are Clappex, a friendly AI assistant."},
                 {"role": "user", "content": user_message}
