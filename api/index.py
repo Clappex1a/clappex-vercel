@@ -64,7 +64,7 @@ async def book(request: Request):
         time = data.get("time")  # ISO format like "2025-09-23T10:00:00Z"
 
         headers = {
-            "apiKey": os.getenv("CAL_API_KEY"),  # ✅ Correct header for Cal.com
+            "Authorization": f"Bearer {os.getenv('CAL_API_KEY')}",  # ✅ Correct format for Cal.com
             "Content-Type": "application/json"
         }
 
