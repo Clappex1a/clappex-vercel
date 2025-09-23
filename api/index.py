@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+# Allow frontend access
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -13,10 +14,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Root endpoint
 @app.get("/")
 def home():
     return JSONResponse(content={"message": "Clappex is live on Vercel!"})
 
+# Chat endpoint with OpenRouter AI
 @app.post("/chat")
 async def chat(request: Request):
     try:
@@ -29,7 +32,7 @@ async def chat(request: Request):
         }
 
         payload = {
-            "model": "mistral:7b-instruct",
+            "model": "mistral:7b-instruct",  # You can change this model later
             "messages": [
                 {"role": "system", "content": "You are Clappex, a friendly AI assistant."},
                 {"role": "user", "content": user_message}
@@ -45,6 +48,7 @@ async def chat(request: Request):
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
+# Vercel-compatible handler
 def handler(event, context):
     from mangum import Mangum
     asgi_handler = Mangum(app)
