@@ -64,13 +64,15 @@ async def book(request: Request):
         time = data.get("time")  # ISO format like "2025-09-23T10:00:00Z"
 
         api_key = os.getenv("CAL_API_KEY")
-        print("🔑 Loaded CAL_API_KEY:", api_key)  # Debug print to confirm key is loaded
+        print("🔑 Loaded CAL_API_KEY:", api_key)
 
         if not api_key:
             return JSONResponse(content={"error": "CAL_API_KEY not found in environment"}, status_code=500)
 
+        api_key = api_key.strip()  # ✅ Remove newline or space
+
         headers = {
-            "Authorization": f"Bearer {api_key}",  # ✅ Correct format for Cal.com
+            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
 
