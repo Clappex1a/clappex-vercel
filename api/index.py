@@ -59,22 +59,28 @@ async def chat(request: Request):
 async def book(request: Request):
     try:
         data = await request.json()
+        print("📥 Incoming data:", data)
+
         name = data.get("name")
         email = data.get("email")
-        time = data.get("time")  # ISO format like "2025-09-23T10:00:00Z"
+        time = data.get("time")
+
+        if not name or not email or not time:
+            return JSONResponse(content={"error": "Missing name, email, or time"}, status_code=400)
 
         raw_key = os.getenv("CAL_API_KEY")
         print("🔑 Raw CAL_API_KEY:", repr(raw_key))
 
         if not raw_key:
-            return JSONResponse(content={"error": "CAL_API_KEY not found in environment"}, status_code=500)
+            return JSONResponse(content={"error": "CAL_API_KEY not found"}, status_code=500)
 
-        api_key = raw_key.strip()  # ✅ Remove newline or space
+        api_key = raw_key.strip()
 
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
+        print("📤 Headers:", headers)
 
         payload = {
             "eventTypeId": os.getenv("CAL_EVENT_TYPE_ID"),
@@ -82,26 +88,29 @@ async def book(request: Request):
             "email": email,
             "start": time
         }
+        print("📤 Payload:", payload)
 
         async with httpx.AsyncClient() as client:
             response = await client.post("https://api.cal.com/v1/bookings", headers=headers, json=payload)
-            print("📅 Cal.com response status:", response.status_code)
-            print("📅 Cal.com response body:", response.text)
+            print("📅 Cal.com status:", response.status_code)
+            print("📅 Cal.com body:", response.text)
 
             try:
                 data = response.json()
             except Exception as parse_error:
-                print("❌ Failed to parse Cal.com JSON:", parse_error)
-                return JSONResponse(content={"error": "Cal.com returned invalid JSON", "raw": response.text}, status_code=500)
+                print("❌ JSON parse error:", parse_error)
+                return JSONResponse(content={"error": "Invalid JSON from Cal.com", "raw": response.text}, status_code=500)
 
             if response.status_code == 200:
                 return JSONResponse(content={"success": True, "booking": data})
             else:
-                return JSONResponse(content={"success": False, "error": data}, status_code=400)
+                return JSONResponse(content={"success": False, "error": data}, status_code=response.status_code)
 
     except Exception as e:
-        print("🔥 Booking route crashed:", str(e))
-        return JSONResponse(content={"error": str(e)}, status_code=500)
+        import traceback
+        error_trace = traceback.format_exc()
+        print("🔥 Booking route crashed:\n", error_trace)
+        return JSONResponse(content={"error": str(e), "trace": error_trace}, status_code=500)
 
 # Vercel-compatible handler
 def handler(event, context):
