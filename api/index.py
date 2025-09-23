@@ -67,6 +67,7 @@ async def book(request: Request):
             "Authorization": f"Bearer {os.getenv('CAL_API_KEY')}",  # ✅ Correct format for Cal.com
             "Content-Type": "application/json"
         }
+        print("🔐 Sending headers:", headers)
 
         payload = {
             "eventTypeId": os.getenv("CAL_EVENT_TYPE_ID"),
